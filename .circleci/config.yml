@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/yahoojapan/gongt
+    docker:
+      - image: circleci/golang:1.8.0
+        environment:
+          GO15VENDOREXPERIMENT: 1
+          LD_LIBRARY_PATH: /usr/local/lib
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - checkout
+      - run:
+          name: preparation
+          command: |
+            mkdir -p $TEST_RESULTS
+            sudo apt-get install cmake
+            cd ~
+            git clone https://github.com/yahoojapan/NGT
+            mkdir -p NGT/build
+            cd NGT/build
+            cmake ..
+            make -j
+            sudo make install
+            go get -u github.com/jstemmer/go-junit-report
+      - run:
+          name: run test
+          command: |
+            trap "go-junit-report < ${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            go test -v -race -coverprofile=coverage.out -covermode=atomic gongt.go gongt_test.go | tee ${TEST_RESULTS}/go-test.out
