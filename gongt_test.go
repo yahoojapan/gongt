@@ -351,7 +351,7 @@ func TestStrictRemove(t *testing.T) {
 
 func TestGetStrictVector(t *testing.T) {
 	tests := []struct {
-		id   int
+		id   uint
 		want []float32
 	}{
 		{1, []float32{1, 0, 0, 0, 0, 0}},
