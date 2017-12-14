@@ -17,14 +17,12 @@
 package gongt_test
 
 import (
-	"os"
 	"io/ioutil"
-
-	"gonum.org/v1/hdf5"
-	
+	"os"
 	"testing"
 
 	"github.com/yahoojapan/gongt"
+	"gonum.org/v1/hdf5"
 )
 
 type data struct {
@@ -33,48 +31,48 @@ type data struct {
 }
 
 var (
-	fashionmnist = data{"Fashion-MNIST","assets/bench/fashion-mnist-784-euclidean.hdf5"}
-	glove25 = data{"GloVe-25", "assets/bench/glove-25-angular.hdf5"}
-	glove50 = data{"GloVe-50", "assets/bench/glove-50-angular.hdf5"}
-	glove100 = data{"GloVe-100", "assets/bench/glove-100-angular.hdf5"}
-	glove200 = data{"GloVe-200", "assets/bench/glove-200-angular.hdf5"}
-	mnist =	data{"MNIST", "assets/bench/mnist-784-euclidean.hdf5"}
-	nytimes = data{"NYTimes", "assets/bench/nytimes-256-angular.hdf5"}
-	sift = data{"SIFT", "assets/bench/sift-128-euclidean.hdf5"}
+	fashionmnist = data{"Fashion-MNIST", "assets/bench/fashion-mnist-784-euclidean.hdf5"}
+	glove25      = data{"GloVe-25", "assets/bench/glove-25-angular.hdf5"}
+	glove50      = data{"GloVe-50", "assets/bench/glove-50-angular.hdf5"}
+	glove100     = data{"GloVe-100", "assets/bench/glove-100-angular.hdf5"}
+	glove200     = data{"GloVe-200", "assets/bench/glove-200-angular.hdf5"}
+	mnist        = data{"MNIST", "assets/bench/mnist-784-euclidean.hdf5"}
+	nytimes      = data{"NYTimes", "assets/bench/nytimes-256-angular.hdf5"}
+	sift         = data{"SIFT", "assets/bench/sift-128-euclidean.hdf5"}
 )
 
 func load(d data, name string) ([][]float64, error) {
 	f, err := hdf5.OpenFile(d.path, hdf5.F_ACC_RDONLY)
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 	defer f.Close()
-  dset, err := f.OpenDataset(name)
-  if err != nil {
-    return nil, err
-  }
+	dset, err := f.OpenDataset(name)
+	if err != nil {
+		return nil, err
+	}
 	defer dset.Close()
-  space := dset.Space()
+	space := dset.Space()
 	defer space.Close()
-  dims, _, err := space.SimpleExtentDims()
-  if err != nil {
-    return nil, err
-  }
-  v := make([]float32, space.SimpleExtentNPoints())
-  if err := dset.Read(&v); err != nil {
-    return nil, err
-  }
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+	v := make([]float32, space.SimpleExtentNPoints())
+	if err := dset.Read(&v); err != nil {
+		return nil, err
+	}
 
 	row := int(dims[0])
 	col := int(dims[1])
 
-  vec := make([][]float64, row)
-  for i := 0; i < row; i++ {
-    vec[i] = make([]float64, col)
-    for j := 0; j < col; j++ {
-      vec[i][j] = float64(v[i * col + j])
-    }
-  }
+	vec := make([][]float64, row)
+	for i := 0; i < row; i++ {
+		vec[i] = make([]float64, col)
+		for j := 0; j < col; j++ {
+			vec[i][j] = float64(v[i*col+j])
+		}
+	}
 	return vec, nil
 }
 
@@ -89,15 +87,15 @@ func benchmarkInsert(b *testing.B, d data) {
 		b.Error(err)
 	}
 	defer os.RemoveAll(tmpdir)
-	
+
 	n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
 	defer n.Close()
-	
+
 	b.ReportAllocs()
 	b.ResetTimer()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		n.Insert(dataset[i % len(dataset)])
+		n.Insert(dataset[i%len(dataset)])
 	}
 	b.StopTimer()
 }
@@ -140,7 +138,7 @@ func benchmarkSearch(b *testing.B, d data) {
 		b.Error(err)
 	}
 
-	path := "assets/bench"+d.name
+	path := "assets/bench" + d.name
 	n := gongt.New(path).Open()
 	defer n.Close()
 	size := 10
@@ -149,7 +147,7 @@ func benchmarkSearch(b *testing.B, d data) {
 	b.ResetTimer()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		n.Search(dataset[i % len(dataset)], size, gongt.DefaultEpsilon)
+		n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
 	}
 	b.StopTimer()
 }

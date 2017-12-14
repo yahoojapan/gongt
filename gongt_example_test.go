@@ -286,13 +286,13 @@ func ExampleNGT_InsertCommit() {
 func ExampleBulkInsert() {
 	// Vector Bulk Insert
 	vectors := [][]float64{
-		[]float64{1, 0, 0, 0, 0, 0},
-		[]float64{0, 1, 0, 0, 0, 0},
-		[]float64{0, 0, 1, 0, 0, 0},
-		[]float64{0, 0, 0, 1, 0, 0},
-		[]float64{0, 0, 0, 0, 1, 0},
-		[]float64{0, 0, 0, 0, 0, 1},
-		[]float64{1, 1, 0, 0, 0, 0},
+		{1, 0, 0, 0, 0, 0},
+		{0, 1, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0},
+		{0, 0, 0, 1, 0, 0},
+		{0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0, 1},
+		{1, 1, 0, 0, 0, 0},
 	}
 	ids, errs := gongt.BulkInsert(vectors)
 	// Output:
@@ -303,13 +303,13 @@ func ExampleBulkInsert() {
 func ExampleNGT_BulkInsert() {
 	// Vector Bulk Insert
 	vectors := [][]float64{
-		[]float64{1, 0, 0, 0, 0, 0},
-		[]float64{0, 1, 0, 0, 0, 0},
-		[]float64{0, 0, 1, 0, 0, 0},
-		[]float64{0, 0, 0, 1, 0, 0},
-		[]float64{0, 0, 0, 0, 1, 0},
-		[]float64{0, 0, 0, 0, 0, 1},
-		[]float64{1, 1, 0, 0, 0, 0},
+		{1, 0, 0, 0, 0, 0},
+		{0, 1, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0},
+		{0, 0, 0, 1, 0, 0},
+		{0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0, 1},
+		{1, 1, 0, 0, 0, 0},
 	}
 	ids, errs := gongt.Get().BulkInsert(vectors)
 	// Output:
@@ -320,13 +320,13 @@ func ExampleNGT_BulkInsert() {
 func ExampleBulkInsertCommit() {
 	// Vector Bulk Insert And Commit
 	vectors := [][]float64{
-		[]float64{1, 0, 0, 0, 0, 0},
-		[]float64{0, 1, 0, 0, 0, 0},
-		[]float64{0, 0, 1, 0, 0, 0},
-		[]float64{0, 0, 0, 1, 0, 0},
-		[]float64{0, 0, 0, 0, 1, 0},
-		[]float64{0, 0, 0, 0, 0, 1},
-		[]float64{1, 1, 0, 0, 0, 0},
+		{1, 0, 0, 0, 0, 0},
+		{0, 1, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0},
+		{0, 0, 0, 1, 0, 0},
+		{0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0, 1},
+		{1, 1, 0, 0, 0, 0},
 	}
 	ids, errs := gongt.BulkInsertCommit(vectors, gongt.DefaultPoolSize)
 	// Output:
@@ -337,13 +337,13 @@ func ExampleBulkInsertCommit() {
 func ExampleNGT_BulkInsertCommit() {
 	// Vector Bulk Insert And Commit
 	vectors := [][]float64{
-		[]float64{1, 0, 0, 0, 0, 0},
-		[]float64{0, 1, 0, 0, 0, 0},
-		[]float64{0, 0, 1, 0, 0, 0},
-		[]float64{0, 0, 0, 1, 0, 0},
-		[]float64{0, 0, 0, 0, 1, 0},
-		[]float64{0, 0, 0, 0, 0, 1},
-		[]float64{1, 1, 0, 0, 0, 0},
+		{1, 0, 0, 0, 0, 0},
+		{0, 1, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0},
+		{0, 0, 0, 1, 0, 0},
+		{0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0, 1},
+		{1, 1, 0, 0, 0, 0},
 	}
 	ids, errs := gongt.Get().BulkInsertCommit(vectors, gongt.DefaultPoolSize)
 	// Output:

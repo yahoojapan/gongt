@@ -106,7 +106,7 @@ const (
 	DefaultBulkInsertChunkSize = 100
 	// DefaultPoolSize is 1
 	DefaultPoolSize = 1
-	
+
 	// ErrorCode is false
 	ErrorCode = C._Bool(false)
 )
@@ -493,7 +493,6 @@ func StrictInsert(vec []float64) (uint, error) {
 	return ngt.StrictInsert(vec)
 }
 
-
 // StrictInsert is C type stricted insert function
 func (n *NGT) StrictInsert(vec []float64) (uint, error) {
 	ebuf := C.ngt_create_error_object()
@@ -669,24 +668,24 @@ func (n *NGT) SaveIndex() error {
 
 // StrictRemove is C type stricted remove function
 func StrictRemove(id uint) error {
-  return ngt.StrictRemove(id)
+	return ngt.StrictRemove(id)
 }
 
 // StrictRemove is C type stricted remove function
 func (n *NGT) StrictRemove(id uint) error {
-  ebuf := C.ngt_create_error_object()
-  defer C.ngt_destroy_error_object(ebuf)
+	ebuf := C.ngt_create_error_object()
+	defer C.ngt_destroy_error_object(ebuf)
 
-  n.mu.Lock()
-  ret := C.ngt_remove_index(n.index, C.ObjectID(id), ebuf)
-  n.mu.Unlock()
-  if ret == ErrorCode {
-    err := newGoError(ebuf)
-    n.errs = append(n.errs, err)
-    return err
-  }
+	n.mu.Lock()
+	ret := C.ngt_remove_index(n.index, C.ObjectID(id), ebuf)
+	n.mu.Unlock()
+	if ret == ErrorCode {
+		err := newGoError(ebuf)
+		n.errs = append(n.errs, err)
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 // Remove removes from NGT index.
