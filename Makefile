@@ -4,6 +4,10 @@ GO_VERSION := $(shell go version)
 REVISION := $(shell git rev-parse --short HEAD)
 PROJECT_ROOT := $(shell pwd)
 
+init:
+	go get -u github.com/golang/dep/cmd/dep
+	dep ensure
+
 build:
 	go build gongt.go
 
@@ -11,10 +15,13 @@ test:
 	go test -v .
 
 bench:
-	cd $(PROJECT_ROOT)/assets/bench && ./download.sh
 	go run example/main.go -create
 	go test -bench .
 
-clean:
+download:
+	cd $(PROJECT_ROOT)/assets/bench && ./download.sh
 
-.PHONY: build test publish clean bench
+clean:
+	rm -rf $(PROJECT_ROOT)/assets/bench/*.hdf5
+
+.PHONY: build test publish clean bench download init

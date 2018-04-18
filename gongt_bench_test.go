@@ -39,10 +39,21 @@ var (
 	mnist        = data{"MNIST", "assets/bench/mnist-784-euclidean.hdf5"}
 	nytimes      = data{"NYTimes", "assets/bench/nytimes-256-angular.hdf5"}
 	sift         = data{"SIFT", "assets/bench/sift-128-euclidean.hdf5"}
+
+	datas = []data{
+		fashionmnist,
+		glove25,
+		glove50,
+		glove100,
+		glove200,
+		mnist,
+		nytimes,
+		sift,
+	}
 )
 
-func load(d data, name string) ([][]float64, error) {
-	f, err := hdf5.OpenFile(d.path, hdf5.F_ACC_RDONLY)
+func load(path, name string) ([][]float64, error) {
+	f, err := hdf5.OpenFile(path, hdf5.F_ACC_RDONLY)
 	if err != nil {
 		return nil, err
 	}
@@ -76,110 +87,114 @@ func load(d data, name string) ([][]float64, error) {
 	return vec, nil
 }
 
-func benchmarkInsert(b *testing.B, d data) {
-	dataset, err := load(d, "train")
-	if err != nil {
-		b.Error(err)
+func BenchmarkInsert(b *testing.B) {
+	for _, d := range datas {
+		b.Run(d.name, func(sb *testing.B) {
+			dataset, err := load(d.path, "train")
+			if err != nil {
+				sb.Error(err)
+			}
+
+			tmpdir, err := ioutil.TempDir("", "tmpdir")
+			if err != nil {
+				sb.Error(err)
+			}
+			defer os.RemoveAll(tmpdir)
+
+			n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
+			defer n.Close()
+
+			sb.ReportAllocs()
+			sb.ResetTimer()
+			sb.StartTimer()
+			for i := 0; i < sb.N; i++ {
+				n.Insert(dataset[i%len(dataset)])
+			}
+			sb.StopTimer()
+		})
 	}
+}
 
-	tmpdir, err := ioutil.TempDir("", "tmpdir")
-	if err != nil {
-		b.Error(err)
+func BenchmarkInsertParallel(b *testing.B) {
+	for _, d := range datas {
+		b.Run(d.name, func(sb *testing.B) {
+			dataset, err := load(d.path, "train")
+			if err != nil {
+				sb.Error(err)
+			}
+
+			tmpdir, err := ioutil.TempDir("", "tmpdir")
+			if err != nil {
+				sb.Error(err)
+			}
+			defer os.RemoveAll(tmpdir)
+
+			n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
+			defer n.Close()
+
+			sb.ReportAllocs()
+			sb.ResetTimer()
+			sb.StartTimer()
+			sb.RunParallel(func(pb *testing.PB) {
+				i := 0
+				for pb.Next() {
+					n.Insert(dataset[i%len(dataset)])
+					i++
+				}
+			})
+			sb.StopTimer()
+		})
 	}
-	defer os.RemoveAll(tmpdir)
+}
 
-	n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
-	defer n.Close()
+func BenchmarkSearch(b *testing.B) {
+	for _, d := range datas {
+		b.Run(d.name, func(sb *testing.B) {
+			dataset, err := load(d.path, "test")
+			if err != nil {
+				sb.Error(err)
+			}
 
-	b.ReportAllocs()
-	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		n.Insert(dataset[i%len(dataset)])
+			path := "assets/bench" + d.name
+			n := gongt.New(path).Open()
+			defer n.Close()
+			size := 10
+
+			sb.ReportAllocs()
+			sb.ResetTimer()
+			sb.StartTimer()
+			for i := 0; i < sb.N; i++ {
+				n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
+			}
+			sb.StopTimer()
+		})
 	}
-	b.StopTimer()
 }
 
-func BenchmarkInsertFashionMNIST(b *testing.B) {
-	benchmarkInsert(b, fashionmnist)
-}
+func BenchmarkSearchParallel(b *testing.B) {
+	for _, d := range datas {
+		b.Run(d.name, func(sb *testing.B) {
+			dataset, err := load(d.path, "test")
+			if err != nil {
+				sb.Error(err)
+			}
 
-func BenchmarkInsertGlove25(b *testing.B) {
-	benchmarkInsert(b, glove25)
-}
+			path := "assets/bench" + d.name
+			n := gongt.New(path).Open()
+			defer n.Close()
+			size := 10
 
-func BenchmarkInsertGlove50(b *testing.B) {
-	benchmarkInsert(b, glove50)
-}
-
-func BenchmarkInsertGlove100(b *testing.B) {
-	benchmarkInsert(b, glove100)
-}
-
-func BenchmarkInsertGlove200(b *testing.B) {
-	benchmarkInsert(b, glove200)
-}
-
-func BenchmarkInsertMNIST(b *testing.B) {
-	benchmarkInsert(b, mnist)
-}
-
-func BenchmarkInsertNYTimes(b *testing.B) {
-	benchmarkInsert(b, nytimes)
-}
-
-func BenchmarkInsertSIFT(b *testing.B) {
-	benchmarkInsert(b, sift)
-}
-
-func benchmarkSearch(b *testing.B, d data) {
-	dataset, err := load(d, "test")
-	if err != nil {
-		b.Error(err)
+			sb.ReportAllocs()
+			sb.ResetTimer()
+			sb.StartTimer()
+			sb.RunParallel(func(pb *testing.PB) {
+				i := 0
+				for pb.Next() {
+					n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
+					i++
+				}
+			})
+			sb.StopTimer()
+		})
 	}
-
-	path := "assets/bench" + d.name
-	n := gongt.New(path).Open()
-	defer n.Close()
-	size := 10
-
-	b.ReportAllocs()
-	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
-	}
-	b.StopTimer()
-}
-
-func BenchmarkSearchFashionMNIST(b *testing.B) {
-	benchmarkSearch(b, fashionmnist)
-}
-
-func BenchmarkSearchGlove25(b *testing.B) {
-	benchmarkSearch(b, glove25)
-}
-
-func BenchmarkSearchGlove50(b *testing.B) {
-	benchmarkSearch(b, glove50)
-}
-
-func BenchmarkSearchGlove100(b *testing.B) {
-	benchmarkSearch(b, glove100)
-}
-
-func BenchmarkSearchGlove200(b *testing.B) {
-	benchmarkSearch(b, glove200)
-}
-
-func BenchmarkSearchMNIST(b *testing.B) {
-	benchmarkSearch(b, mnist)
-}
-
-func BenchmarkSearchNYTimes(b *testing.B) {
-	benchmarkSearch(b, nytimes)
-}
-
-func BenchmarkSearchSIFT(b *testing.B) {
-	benchmarkSearch(b, sift)
 }
