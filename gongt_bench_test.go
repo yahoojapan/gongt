@@ -39,18 +39,44 @@ var (
 	mnist        = data{"MNIST", "assets/bench/mnist-784-euclidean.hdf5"}
 	nytimes      = data{"NYTimes", "assets/bench/nytimes-256-angular.hdf5"}
 	sift         = data{"SIFT", "assets/bench/sift-128-euclidean.hdf5"}
-
-	datas = []data{
-		fashionmnist,
-		glove25,
-		glove50,
-		glove100,
-		glove200,
-		mnist,
-		nytimes,
-		sift,
-	}
 )
+
+func BenchmarkFashionMNIST(b *testing.B) {
+	benchmarkAll(b, fashionmnist)
+}
+
+func BenchmarkGlove25(b *testing.B) {
+	benchmarkAll(b, glove25)
+}
+
+func BenchmarkGlove50(b *testing.B) {
+	benchmarkAll(b, glove50)
+}
+
+func BenchmarkGlove100(b *testing.B) {
+	benchmarkAll(b, glove100)
+}
+
+func BenchmarkGlove200(b *testing.B) {
+	benchmarkAll(b, glove200)
+}
+
+func BenchmarkMIST(b *testing.B) {
+	benchmarkAll(b, mnist)
+}
+
+func BenchmarkNYTimes(b *testing.B) {
+	benchmarkAll(b, nytimes)
+}
+
+func BenchmarkSIFT(b *testing.B) {
+	benchmarkAll(b, sift)
+}
+
+func benchmarkAll(b *testing.B, d data) {
+	benchmarkInsert(b, d)
+	benchmarkSearch(b, d)
+}
 
 func load(path, name string) ([][]float64, error) {
 	f, err := hdf5.OpenFile(path, hdf5.F_ACC_RDONLY)
@@ -87,114 +113,84 @@ func load(path, name string) ([][]float64, error) {
 	return vec, nil
 }
 
-func BenchmarkInsert(b *testing.B) {
-	for _, d := range datas {
-		b.Run(d.name, func(sb *testing.B) {
-			dataset, err := load(d.path, "train")
-			if err != nil {
-				sb.Error(err)
-			}
+func benchmarkInsert(b *testing.B, d data) {
+	dataset, err := load(d.path, "train")
+	if err != nil {
+		b.Error(err)
+	}
+	b.Run("Insert", func(sb *testing.B) {
+		tmpdir, err := ioutil.TempDir("", "tmpdir")
+		if err != nil {
+			sb.Error(err)
+		}
+		defer os.RemoveAll(tmpdir)
 
-			tmpdir, err := ioutil.TempDir("", "tmpdir")
-			if err != nil {
-				sb.Error(err)
-			}
-			defer os.RemoveAll(tmpdir)
+		n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
+		defer n.Close()
 
-			n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
-			defer n.Close()
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		for i := 0; i < sb.N; i++ {
+			n.Insert(dataset[i%len(dataset)])
+		}
+		sb.StopTimer()
+	})
 
-			sb.ReportAllocs()
-			sb.ResetTimer()
-			sb.StartTimer()
-			for i := 0; i < sb.N; i++ {
+	b.Run("InsertParallel", func(sb *testing.B) {
+		tmpdir, err := ioutil.TempDir("", "tmpdir")
+		if err != nil {
+			sb.Error(err)
+		}
+		defer os.RemoveAll(tmpdir)
+
+		n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
+		defer n.Close()
+
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		sb.RunParallel(func(pb *testing.PB) {
+			i := 0
+			for pb.Next() {
 				n.Insert(dataset[i%len(dataset)])
+				i++
 			}
-			sb.StopTimer()
 		})
-	}
+		sb.StopTimer()
+	})
 }
 
-func BenchmarkInsertParallel(b *testing.B) {
-	for _, d := range datas {
-		b.Run(d.name, func(sb *testing.B) {
-			dataset, err := load(d.path, "train")
-			if err != nil {
-				sb.Error(err)
-			}
-
-			tmpdir, err := ioutil.TempDir("", "tmpdir")
-			if err != nil {
-				sb.Error(err)
-			}
-			defer os.RemoveAll(tmpdir)
-
-			n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
-			defer n.Close()
-
-			sb.ReportAllocs()
-			sb.ResetTimer()
-			sb.StartTimer()
-			sb.RunParallel(func(pb *testing.PB) {
-				i := 0
-				for pb.Next() {
-					n.Insert(dataset[i%len(dataset)])
-					i++
-				}
-			})
-			sb.StopTimer()
-		})
+func benchmarkSearch(b *testing.B, d data) {
+	dataset, err := load(d.path, "test")
+	if err != nil {
+		b.Error(err)
 	}
-}
+	path := "assets/bench" + d.name
+	n := gongt.New(path).Open()
+	defer n.Close()
+	size := 10
+	b.Run("Search", func(sb *testing.B) {
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		for i := 0; i < sb.N; i++ {
+			n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
+		}
+		sb.StopTimer()
+	})
 
-func BenchmarkSearch(b *testing.B) {
-	for _, d := range datas {
-		b.Run(d.name, func(sb *testing.B) {
-			dataset, err := load(d.path, "test")
-			if err != nil {
-				sb.Error(err)
-			}
-
-			path := "assets/bench" + d.name
-			n := gongt.New(path).Open()
-			defer n.Close()
-			size := 10
-
-			sb.ReportAllocs()
-			sb.ResetTimer()
-			sb.StartTimer()
-			for i := 0; i < sb.N; i++ {
+	b.Run("SearchParallel", func(sb *testing.B) {
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		sb.RunParallel(func(pb *testing.PB) {
+			i := 0
+			for pb.Next() {
 				n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
+				i++
 			}
-			sb.StopTimer()
 		})
-	}
-}
-
-func BenchmarkSearchParallel(b *testing.B) {
-	for _, d := range datas {
-		b.Run(d.name, func(sb *testing.B) {
-			dataset, err := load(d.path, "test")
-			if err != nil {
-				sb.Error(err)
-			}
-
-			path := "assets/bench" + d.name
-			n := gongt.New(path).Open()
-			defer n.Close()
-			size := 10
-
-			sb.ReportAllocs()
-			sb.ResetTimer()
-			sb.StartTimer()
-			sb.RunParallel(func(pb *testing.PB) {
-				i := 0
-				for pb.Next() {
-					n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
-					i++
-				}
-			})
-			sb.StopTimer()
-		})
-	}
+		sb.StopTimer()
+	})
 }

@@ -95,7 +95,7 @@ const (
 	// DefaultCreationEdgeSize is 10
 	DefaultCreationEdgeSize = 10
 	// DefaultSearchEdgeSize is 10
-	DefaultSearchEdgeSize = 10
+	DefaultSearchEdgeSize = 40
 	// DefaultObjectType is Float
 	DefaultObjectType = Float
 	// DefaultDistanceType is L2
