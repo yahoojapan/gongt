@@ -41,8 +41,45 @@ var (
 	sift         = data{"SIFT", "assets/bench/sift-128-euclidean.hdf5"}
 )
 
-func load(d data, name string) ([][]float64, error) {
-	f, err := hdf5.OpenFile(d.path, hdf5.F_ACC_RDONLY)
+func BenchmarkFashionMNIST(b *testing.B) {
+	benchmarkAll(b, fashionmnist)
+}
+
+func BenchmarkGlove25(b *testing.B) {
+	benchmarkAll(b, glove25)
+}
+
+func BenchmarkGlove50(b *testing.B) {
+	benchmarkAll(b, glove50)
+}
+
+func BenchmarkGlove100(b *testing.B) {
+	benchmarkAll(b, glove100)
+}
+
+func BenchmarkGlove200(b *testing.B) {
+	benchmarkAll(b, glove200)
+}
+
+func BenchmarkMIST(b *testing.B) {
+	benchmarkAll(b, mnist)
+}
+
+func BenchmarkNYTimes(b *testing.B) {
+	benchmarkAll(b, nytimes)
+}
+
+func BenchmarkSIFT(b *testing.B) {
+	benchmarkAll(b, sift)
+}
+
+func benchmarkAll(b *testing.B, d data) {
+	benchmarkInsert(b, d)
+	benchmarkSearch(b, d)
+}
+
+func load(path, name string) ([][]float64, error) {
+	f, err := hdf5.OpenFile(path, hdf5.F_ACC_RDONLY)
 	if err != nil {
 		return nil, err
 	}
@@ -77,109 +114,83 @@ func load(d data, name string) ([][]float64, error) {
 }
 
 func benchmarkInsert(b *testing.B, d data) {
-	dataset, err := load(d, "train")
+	dataset, err := load(d.path, "train")
 	if err != nil {
 		b.Error(err)
 	}
+	b.Run("Insert", func(sb *testing.B) {
+		tmpdir, err := ioutil.TempDir("", "tmpdir")
+		if err != nil {
+			sb.Error(err)
+		}
+		defer os.RemoveAll(tmpdir)
 
-	tmpdir, err := ioutil.TempDir("", "tmpdir")
-	if err != nil {
-		b.Error(err)
-	}
-	defer os.RemoveAll(tmpdir)
+		n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
+		defer n.Close()
 
-	n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
-	defer n.Close()
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		for i := 0; i < sb.N; i++ {
+			n.Insert(dataset[i%len(dataset)])
+		}
+		sb.StopTimer()
+	})
 
-	b.ReportAllocs()
-	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		n.Insert(dataset[i%len(dataset)])
-	}
-	b.StopTimer()
-}
+	b.Run("InsertParallel", func(sb *testing.B) {
+		tmpdir, err := ioutil.TempDir("", "tmpdir")
+		if err != nil {
+			sb.Error(err)
+		}
+		defer os.RemoveAll(tmpdir)
 
-func BenchmarkInsertFashionMNIST(b *testing.B) {
-	benchmarkInsert(b, fashionmnist)
-}
+		n := gongt.New(tmpdir).SetObjectType(gongt.Float).SetDimension(len(dataset[0])).Open()
+		defer n.Close()
 
-func BenchmarkInsertGlove25(b *testing.B) {
-	benchmarkInsert(b, glove25)
-}
-
-func BenchmarkInsertGlove50(b *testing.B) {
-	benchmarkInsert(b, glove50)
-}
-
-func BenchmarkInsertGlove100(b *testing.B) {
-	benchmarkInsert(b, glove100)
-}
-
-func BenchmarkInsertGlove200(b *testing.B) {
-	benchmarkInsert(b, glove200)
-}
-
-func BenchmarkInsertMNIST(b *testing.B) {
-	benchmarkInsert(b, mnist)
-}
-
-func BenchmarkInsertNYTimes(b *testing.B) {
-	benchmarkInsert(b, nytimes)
-}
-
-func BenchmarkInsertSIFT(b *testing.B) {
-	benchmarkInsert(b, sift)
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		sb.RunParallel(func(pb *testing.PB) {
+			i := 0
+			for pb.Next() {
+				n.Insert(dataset[i%len(dataset)])
+				i++
+			}
+		})
+		sb.StopTimer()
+	})
 }
 
 func benchmarkSearch(b *testing.B, d data) {
-	dataset, err := load(d, "test")
+	dataset, err := load(d.path, "test")
 	if err != nil {
 		b.Error(err)
 	}
-
 	path := "assets/bench" + d.name
 	n := gongt.New(path).Open()
 	defer n.Close()
 	size := 10
+	b.Run("Search", func(sb *testing.B) {
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		for i := 0; i < sb.N; i++ {
+			n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
+		}
+		sb.StopTimer()
+	})
 
-	b.ReportAllocs()
-	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
-	}
-	b.StopTimer()
-}
-
-func BenchmarkSearchFashionMNIST(b *testing.B) {
-	benchmarkSearch(b, fashionmnist)
-}
-
-func BenchmarkSearchGlove25(b *testing.B) {
-	benchmarkSearch(b, glove25)
-}
-
-func BenchmarkSearchGlove50(b *testing.B) {
-	benchmarkSearch(b, glove50)
-}
-
-func BenchmarkSearchGlove100(b *testing.B) {
-	benchmarkSearch(b, glove100)
-}
-
-func BenchmarkSearchGlove200(b *testing.B) {
-	benchmarkSearch(b, glove200)
-}
-
-func BenchmarkSearchMNIST(b *testing.B) {
-	benchmarkSearch(b, mnist)
-}
-
-func BenchmarkSearchNYTimes(b *testing.B) {
-	benchmarkSearch(b, nytimes)
-}
-
-func BenchmarkSearchSIFT(b *testing.B) {
-	benchmarkSearch(b, sift)
+	b.Run("SearchParallel", func(sb *testing.B) {
+		sb.ReportAllocs()
+		sb.ResetTimer()
+		sb.StartTimer()
+		sb.RunParallel(func(pb *testing.PB) {
+			i := 0
+			for pb.Next() {
+				n.Search(dataset[i%len(dataset)], size, gongt.DefaultEpsilon)
+				i++
+			}
+		})
+		sb.StopTimer()
+	})
 }

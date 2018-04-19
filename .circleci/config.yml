@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/yahoojapan/gongt
     docker:
-      - image: circleci/golang:1.10.0
+      - image: circleci/golang:1.10.1
         environment:
           GO15VENDOREXPERIMENT: 1
           LD_LIBRARY_PATH: /usr/local/lib
@@ -25,8 +25,20 @@ jobs:
             make -j
             sudo make install
             go get -u github.com/jstemmer/go-junit-report
+            cd /go/src/github.com/yahoojapan/gongt
+            make init
       - run:
           name: run test
           command: |
             trap "go-junit-report < ${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             go test -v -race -coverprofile=coverage.out -covermode=atomic gongt.go gongt_test.go | tee ${TEST_RESULTS}/go-test.out
+      - run:
+          name: prepare bench
+          command: |
+            sudo apt-get install libhdf5-dev
+            make download
+            make index
+      - run:
+          name: run bench
+          command: |
+            make bench
