@@ -593,6 +593,7 @@ func (n *NGT) BulkInsertCommit(vecs [][]float64, poolSize int) ([]int, []error) 
 	for _, vec := range vecs {
 		if id, err = n.Insert(vec); err == nil {
 			ids = append(ids, id)
+			idx++
 			if idx >= n.prop.BulkInsertChunkSize {
 				err = n.CreateAndSaveIndex(poolSize)
 				if err != nil {
@@ -603,6 +604,10 @@ func (n *NGT) BulkInsertCommit(vecs [][]float64, poolSize int) ([]int, []error) 
 		} else {
 			errs = append(errs, err)
 		}
+	}
+	err = n.CreateAndSaveIndex(poolSize)
+	if err != nil {
+		errs = append(errs, err)
 	}
 	return ids, errs
 }
