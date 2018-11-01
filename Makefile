@@ -1,5 +1,5 @@
 NAME := gongt
-VERSION := v0.0.1
+VERSION := v0.0.2
 GO_VERSION := $(shell go version)
 REVISION := $(shell git rev-parse --short HEAD)
 PROJECT_ROOT := $(shell pwd)

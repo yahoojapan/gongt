@@ -387,7 +387,7 @@ func (n *NGT) Open() *NGT {
 	n.index = C.ngt_open_index(C.CString(n.prop.IndexPath), ebuf)
 	if n.index == nil {
 		err := newGoError(ebuf)
-		if strings.Contains(err.Error(), "PropertSet::load: Cannot load the property file ") {
+		if strings.Contains(err.Error(), "PropertySet::load: Cannot load the property file ") {
 			n.index = C.ngt_create_graph_and_tree(C.CString(n.prop.IndexPath), prop, ebuf)
 			if n.index == nil {
 				n.errs = append(n.errs, newGoError(ebuf))
