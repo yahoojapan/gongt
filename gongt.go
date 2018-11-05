@@ -89,6 +89,10 @@ const (
 	Hamming
 	// Cosine is cosine distance
 	Cosine
+	// NormalizedAngle is angle distance with normalization
+	NormalizedAngle
+	// NormalizedCosine is cosine distance with normalization
+	NormalizedCosine
 
 	// DefaultDimension is 0
 	DefaultDimension = 0
@@ -377,7 +381,15 @@ func (n *NGT) Open() *NGT {
 			return n
 		}
 	case Cosine:
-		// TODO: not exists C API
+		if C.ngt_set_property_distance_type_cosine(prop, ebuf) == ErrorCode {
+			n.errs = append(n.errs, newGoError(ebuf))
+			return n
+		}
+	case NormalizedAngle:
+		// TODO: not exists in C API
+		return n
+	case NormalizedCosine:
+		// TODO: not exists in C API
 		return n
 	default:
 		n.errs = append(n.errs, errors.New("Illegal distance type"))
