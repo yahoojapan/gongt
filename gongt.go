@@ -386,10 +386,12 @@ func (n *NGT) Open() *NGT {
 			return n
 		}
 	case NormalizedAngle:
-		// TODO: not exists in C API
+		// TODO: not implemented in C API
+		n.errs = append(n.errs, errors.New("Not implemented in C API"))
 		return n
 	case NormalizedCosine:
-		// TODO: not exists in C API
+		// TODO: not implemented in C API
+		n.errs = append(n.errs, errors.New("Not implemented in C API"))
 		return n
 	default:
 		n.errs = append(n.errs, errors.New("Illegal distance type"))
