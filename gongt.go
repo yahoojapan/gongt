@@ -118,6 +118,9 @@ const (
 var (
 	once = &sync.Once{}
 	ngt  *NGT
+	
+	// ErrCAPINotImplemented raises using not implemented function in C API 
+	ErrCAPINotImplemented = errors.New("Not implemented in C API")
 )
 
 func init() {
@@ -387,11 +390,11 @@ func (n *NGT) Open() *NGT {
 		}
 	case NormalizedAngle:
 		// TODO: not implemented in C API
-		n.errs = append(n.errs, errors.New("Not implemented in C API"))
+		n.errs = append(n.errs, ErrCAPINotImplemented)
 		return n
 	case NormalizedCosine:
 		// TODO: not implemented in C API
-		n.errs = append(n.errs, errors.New("Not implemented in C API"))
+		n.errs = append(n.errs, ErrCAPINotImplemented)
 		return n
 	default:
 		n.errs = append(n.errs, errors.New("Illegal distance type"))
