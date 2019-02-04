@@ -32,6 +32,18 @@ import (
 )
 
 type (
+	// StrictSearchParameter is struct with same type in NGT core
+	StrictSearchParameter struct {
+		SearchSize int
+		Epsilon    float32
+		Radius     float32
+	}
+	// SearchParameter is struct for comfortable use in Go
+	SearchParameter struct {
+		SearchSize int
+		Epsilon    float64
+		Radius     float64
+	}
 	// StrictSearchResult is struct with same type in NGT core
 	StrictSearchResult struct {
 		ID       uint32
@@ -491,6 +503,78 @@ func Search(vec []float64, size int, epsilon float64) ([]SearchResult, error) {
 // Search returns search result as []SearchResult
 func (n *NGT) Search(vec []float64, size int, epsilon float64) ([]SearchResult, error) {
 	res, err := n.StrictSearch(vec, size, float32(epsilon))
+	if err != nil {
+		return nil, err
+	}
+	idx := 0
+	result := make([]SearchResult, len(res))
+	for _, val := range res {
+		if val.Error == nil {
+			result[idx] = SearchResult{int(val.ID), float64(val.Distance)}
+			idx++
+		}
+	}
+	return result[:idx], nil
+}
+
+// StrictSearchbyParameter is C type stricted search function
+func StrictSearchbyParameter(vec []float64, ssp StrictSearchParameter) ([]StrictSearchResult, error) {
+	return ngt.StrictSearchbyParameter(vec, ssp)
+}
+
+// StrictSearchbyParameter is C type stricted search function
+func (n *NGT) StrictSearchbyParameter(vec []float64, ssp StrictSearchParameter) ([]StrictSearchResult, error) {
+	ebuf := C.ngt_create_error_object()
+	defer C.ngt_destroy_error_object(ebuf)
+
+	results := C.ngt_create_empty_results(ebuf)
+	defer C.ngt_destroy_results(results)
+	if results == nil {
+		return nil, newGoError(ebuf)
+	}
+
+	ngtsp := C.NGTSearchParameter{
+		query_dim:   C.int32_t(n.prop.Dimension),
+		result_size: C.size_t(ssp.SearchSize),
+		epsilon:     C.float(ssp.Epsilon),
+		radius:      C.float(ssp.Radius),
+	}
+	n.mu.RLock()
+	ret := C.ngt_search(n.index, (*C.double)(&vec[0]), ngtsp, results, ebuf)
+	n.mu.RUnlock()
+	if ret == ErrorCode {
+		return nil, newGoError(ebuf)
+	}
+	rsize := int(C.ngt_get_size(results, ebuf))
+	if rsize == -1 {
+		return nil, newGoError(ebuf)
+	}
+	result := make([]StrictSearchResult, rsize)
+	for i := 0; i < rsize; i++ {
+		d := C.ngt_get_result(results, C.uint32_t(i), ebuf)
+		if d.id == 0 && d.distance == 0 {
+			result[i] = StrictSearchResult{0, 0, newGoError(ebuf)}
+		} else {
+			result[i] = StrictSearchResult{uint32(d.id), float32(d.distance), nil}
+		}
+	}
+
+	return result, nil
+}
+
+// SearchbyParameter returns search result as []SearchResult
+func SearchbyParameter(vec []float64, sp SearchParameter) ([]SearchResult, error) {
+	return ngt.SearchbyParameter(vec, sp)
+}
+
+// SearchbyParameter returns search result as []SearchResult
+func (n *NGT) SearchbyParameter(vec []float64, sp SearchParameter) ([]SearchResult, error) {
+	ssp := StrictSearchParameter{
+		sp.SearchSize,
+		float32(sp.Epsilon),
+		float32(sp.Radius),
+	}
+	res, err := n.StrictSearchbyParameter(vec, ssp)
 	if err != nil {
 		return nil, err
 	}
