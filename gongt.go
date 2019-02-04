@@ -517,13 +517,13 @@ func (n *NGT) Search(vec []float64, size int, epsilon float64) ([]SearchResult, 
 	return result[:idx], nil
 }
 
-// StrictSearchbyParameter is C type stricted search function
-func StrictSearchbyParameter(vec []float64, ssp StrictSearchParameter) ([]StrictSearchResult, error) {
-	return ngt.StrictSearchbyParameter(vec, ssp)
+// StrictSearchByParameter is C type stricted search function
+func StrictSearchByParameter(vec []float64, ssp StrictSearchParameter) ([]StrictSearchResult, error) {
+	return ngt.StrictSearchByParameter(vec, ssp)
 }
 
-// StrictSearchbyParameter is C type stricted search function
-func (n *NGT) StrictSearchbyParameter(vec []float64, ssp StrictSearchParameter) ([]StrictSearchResult, error) {
+// StrictSearchByParameter is C type stricted search function
+func (n *NGT) StrictSearchByParameter(vec []float64, ssp StrictSearchParameter) ([]StrictSearchResult, error) {
 	ebuf := C.ngt_create_error_object()
 	defer C.ngt_destroy_error_object(ebuf)
 
@@ -562,19 +562,19 @@ func (n *NGT) StrictSearchbyParameter(vec []float64, ssp StrictSearchParameter) 
 	return result, nil
 }
 
-// SearchbyParameter returns search result as []SearchResult
-func SearchbyParameter(vec []float64, sp SearchParameter) ([]SearchResult, error) {
-	return ngt.SearchbyParameter(vec, sp)
+// SearchByParameter returns search result as []SearchResult
+func SearchByParameter(vec []float64, sp SearchParameter) ([]SearchResult, error) {
+	return ngt.SearchByParameter(vec, sp)
 }
 
-// SearchbyParameter returns search result as []SearchResult
-func (n *NGT) SearchbyParameter(vec []float64, sp SearchParameter) ([]SearchResult, error) {
+// SearchByParameter returns search result as []SearchResult
+func (n *NGT) SearchByParameter(vec []float64, sp SearchParameter) ([]SearchResult, error) {
 	ssp := StrictSearchParameter{
 		sp.SearchSize,
 		float32(sp.Epsilon),
 		float32(sp.Radius),
 	}
-	res, err := n.StrictSearchbyParameter(vec, ssp)
+	res, err := n.StrictSearchByParameter(vec, ssp)
 	if err != nil {
 		return nil, err
 	}
