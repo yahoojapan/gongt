@@ -118,8 +118,8 @@ const (
 var (
 	once = &sync.Once{}
 	ngt  *NGT
-	
-	// ErrCAPINotImplemented raises using not implemented function in C API 
+
+	// ErrCAPINotImplemented raises using not implemented function in C API
 	ErrCAPINotImplemented = errors.New("Not implemented in C API")
 )
 
@@ -247,7 +247,7 @@ func SetSearchEdgeSize(size int) *NGT {
 //	gongt.Get().SetSearchEdgeSize(10) // SearchEdgeSize Setting
 //	gongt.New("").SetSearchEdgeSize(10) // SearchEdgeSize Setting
 func (n *NGT) SetSearchEdgeSize(size int) *NGT {
-	if size > 0 {
+	if size >= 0 {
 		n.mu.Lock()
 		n.prop.SearchEdgeSize = size
 		n.mu.Unlock()
