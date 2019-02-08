@@ -1,0 +1,6 @@
+github.com/kpango/fastime v1.0.0 h1:tZeI+eEyHHYKkTkKOiOZ5MeeRJmliuZlGV7aK7S2rkE=
+github.com/kpango/fastime v1.0.0/go.mod h1:Y5XY5bLG5yc7g2XmMUzc22XYV1XaH+KgUOHkDvLp4SA=
+github.com/kpango/glg v1.2.7 h1:aVnv89IIWXSFNOm93SnDQGIKF27Jzz9olieOL2b23Xc=
+github.com/kpango/glg v1.2.7/go.mod h1:sEwy6Va116x0eKdbVsilHPanIrsoE9AR/9vHwdo4ytQ=
+gonum.org/v1/hdf5 v0.0.0-20180702054324-c257073619f4 h1:3GnLlVt6JOlXwffishXEToqGjH7hx/G8UK7RP7HTqX0=
+gonum.org/v1/hdf5 v0.0.0-20180702054324-c257073619f4/go.mod h1:g+PDU5ogjIKcc3Cg4ALAK7X4c8bBQvPzPKWNW5NB7I0=

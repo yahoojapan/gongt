@@ -4,9 +4,12 @@ GO_VERSION := $(shell go version)
 REVISION := $(shell git rev-parse --short HEAD)
 PROJECT_ROOT := $(shell pwd)
 
-init:
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure
+deps:
+	curl -LO https://github.com/yahoojapan/NGT/archive/v$(NGT_VERSION).tar.gz
+	tar zxf v$(NGT_VERSION).tar.gz -C /tmp
+	cd /tmp/NGT-$(NGT_VERSION); cmake .
+	make -j -C /tmp/NGT-$(NGT_VERSION)
+	make install -C /tmp/NGT-$(NGT_VERSION)
 
 build:
 	go build gongt.go
