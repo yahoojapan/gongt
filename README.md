@@ -1,4 +1,5 @@
 # gongt [![License: Apache](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![release](https://img.shields.io/github/release/yahoojapan/gongt.svg)](https://github.com/yahoojapan/gongt/releases/latest) [![CircleCI](https://circleci.com/gh/yahoojapan/gongt.svg?style=shield)](https://circleci.com/gh/yahoojapan/gongt) [![codecov](https://codecov.io/gh/yahoojapan/gongt/branch/master/graph/badge.svg)](https://codecov.io/gh/yahoojapan/gongt) [![Go Report Card](https://goreportcard.com/badge/github.com/yahoojapan/gongt)](https://goreportcard.com/report/github.com/yahoojapan/gongt) [![GoDoc](http://godoc.org/github.com/yahoojapan/gongt?status.svg)](http://godoc.org/github.com/yahoojapan/gongt) [![Join the chat at https://gitter.im/yahoojapan/gongt](https://badges.gitter.im/yahoojapan/gongt.svg)](https://gitter.im/yahoojapan/gongt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fyahoojapan%2Fgongt.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fyahoojapan%2Fgongt?ref=badge_shield)
 
 ## Description
 gongt provides Go API for [NGT](https://github.com/yahoojapan/NGT).
@@ -112,3 +113,6 @@ Authors
 
 [Kosuke Morimoto](https://github.com/kou-m)  
 [kpango](https://github.com/kpango)
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fyahoojapan%2Fgongt.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fyahoojapan%2Fgongt?ref=badge_large)
