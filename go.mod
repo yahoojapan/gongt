@@ -1,6 +1,8 @@
 module github.com/yahoojapan/gongt
 
+go 1.12
+
 require (
-	github.com/kpango/glg v1.2.7
-	gonum.org/v1/hdf5 v0.0.0-20180702054324-c257073619f4
+	github.com/kpango/glg v1.3.0
+	gonum.org/v1/hdf5 v0.0.0-20190227001252-83207889d689
 )
