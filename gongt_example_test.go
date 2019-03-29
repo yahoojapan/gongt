@@ -197,7 +197,7 @@ func ExampleNGT_Open() {
 func ExampleStrictSearch() {
 	// Strict Vector Search
 	vector := []float64{1, 0, 0, 0, 0, 0}
-	res, err := gongt.StrictSearch(vector, 1, gongt.DefaultEpsilon)
+	res, err := gongt.StrictSearch(vector, 1, gongt.DefaultEpsilon, 1.1)
 	// Output:
 	_, _ = res, err
 }
@@ -205,7 +205,7 @@ func ExampleStrictSearch() {
 func ExampleNGT_StrictSearch() {
 	// Strict Vector Search
 	vector := []float64{1, 0, 0, 0, 0, 0}
-	res, err := gongt.Get().StrictSearch(vector, 1, gongt.DefaultEpsilon)
+	res, err := gongt.Get().StrictSearch(vector, 1, gongt.DefaultEpsilon, 0.9)
 	// Output:
 	//
 	_, _ = res, err

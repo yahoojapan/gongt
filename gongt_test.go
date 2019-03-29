@@ -277,7 +277,7 @@ func TestStrictSearch(t *testing.T) {
 		t.Errorf("Unexpected error: TestStrictSearch(%v)", errs)
 	}
 	for _, tt := range tests {
-		result, err := ngt.StrictSearch(tt.vector, 1, DefaultEpsilon)
+		result, err := ngt.StrictSearch(tt.vector, 1, DefaultEpsilon, -1.0)
 		if err != nil {
 			t.Errorf("Unexpected error: TestSearch(%v)", err)
 		}
