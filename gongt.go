@@ -675,9 +675,9 @@ func (n *NGT) SaveIndex() error {
 	ebuf := C.ngt_create_error_object()
 	defer C.ngt_destroy_error_object(ebuf)
 
-	n.mu.Lock()
+	n.mu.RLock()
 	ret := C.ngt_save_index(n.index, C.CString(n.prop.IndexPath), ebuf)
-	n.mu.Unlock()
+	n.mu.RUnlock()
 
 	if ret == ErrorCode {
 		err := newGoError(ebuf)
