@@ -2,12 +2,12 @@ alias:
   default: &default
     working_directory: /go/src/github.com/yahoojapan/gongt
     docker:
-      - image: circleci/golang:1.11.4
+      - image: circleci/golang:1.12.5
         environment:
           GOPATH: "/go"
           GO111MODULE: "on"
           LD_LIBRARY_PATH: /usr/local/lib
-          NGT_VERSION: 1.7.0
+          NGT_VERSION: 1.7.3
           REPO_NAME: "yahoojapan"
           IMAGE_NAME: "gongt"
           GITHUB_API: "https://api.github.com/"
@@ -21,6 +21,13 @@ jobs:
       - checkout
       - restore_cache:
           key: gosum-{{ .Branch }}-{{ checksum "go.sum" }}
+      - run:
+          name: info
+          command: |
+            uname -r
+            uname -a
+            cat /proc/cpuinfo
+            cat /proc/meminfo
       - run:
           name: install dependencies
           command: |

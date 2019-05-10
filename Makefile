@@ -7,6 +7,7 @@ PROJECT_ROOT := $(shell pwd)
 deps:
 	curl -LO https://github.com/yahoojapan/NGT/archive/v$(NGT_VERSION).tar.gz
 	tar zxf v$(NGT_VERSION).tar.gz -C /tmp
+	# cd /tmp/NGT-$(NGT_VERSION)&& cmake -DNGT_AVX_DISABLED=1 .
 	cd /tmp/NGT-$(NGT_VERSION)&& cmake .
 	make -j -C /tmp/NGT-$(NGT_VERSION)
 	make install -C /tmp/NGT-$(NGT_VERSION)
