@@ -6,7 +6,7 @@ gongt provides Go API for [NGT](https://github.com/yahoojapan/NGT).
 NGT is Neighborhood Graph and Tree for Indexing High-dimensional Data. If you want more information, please read [NGT repository](https://github.com/yahoojapan/NGT).
 
 ## Dependency
-- [NGT](https://github.com/yahoojapan/NGT)
+- [NGT](https://github.com/yahoojapan/NGT) v1.7.3
 
 ## Installation
 ```
